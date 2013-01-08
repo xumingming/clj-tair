@@ -1,13 +1,13 @@
 # clj-tair
 
-FIXME: write description
+Clojure client for [Tair](https://github.com/taobao/tair)
 
 ## Usage
 
-FIXME: write
+
 
 ## License
 
-Copyright (C) 2013 FIXME
+Copyright (C) 2013 xumingming
 
 Distributed under the Eclipse Public License, the same as Clojure.
