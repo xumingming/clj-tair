@@ -88,7 +88,16 @@
               (let [result-code (ResultCode. 0 "success")
                     inner-ret (Result. result-code (int 100))
                     out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
-                out-ret))))
+                out-ret))
+            (getVersion
+              [this]
+              "1.0.0")
+            (getMaxFailCount
+              [this]
+              (int 99))
+            (setMaxFailCount
+              [this cnt]
+              nil)))
 
 ;; define the test namespace
 (def namespace 99)
@@ -159,3 +168,12 @@
 
 (deftest test-prefix-decrs
   (is (= {"bar1" 100 "bar2" 100} (prefix-decrs tair namespace "foo" [["bar1" 1 0 0] ["bar2" 1 0 0]]))))
+
+(deftest test-get-version
+  (is (= "1.0.0" (get-version tair))))
+
+(deftest test-get-max-fail-count
+  (is (= (int 99) (get-max-fail-count tair))))
+
+(deftest test-set-max-fail-count
+  (set-max-fail-count tair (int 99)))

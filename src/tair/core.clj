@@ -219,6 +219,15 @@
                  {})]
     result))
 
+(defn get-version [tair]
+  (.getVersion tair))
+
+(defn get-max-fail-count [tair]
+  (.getMaxFailCount tair))
+
+(defn set-max-fail-count [tair cnt]
+  (.setMaxFailCount tair cnt))
+
 (defn- object-to-json [obj]
   (JSON/toJSON obj))
 
