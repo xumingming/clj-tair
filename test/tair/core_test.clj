@@ -142,6 +142,21 @@
                                               "foo2" {"bar3" temp-result
                                                       "bar4" temp-result}})]
                 ret))
+            (setCount
+              [tair namespace key count]
+              ResultCode/SUCCESS)
+            (setCount
+              [tair namespace key count version expire-time]
+              ResultCode/SUCCESS)
+            (addItems
+              [tair namespace key items max-count version expire-time]
+              ResultCode/SUCCESS)
+            (getItems
+              [tair namespace key offset count]
+              (Result. ResultCode/SUCCESS (DataEntry. 1)))
+            (removeItems
+              [tair namespace key offset count]
+              ResultCode/SUCCESS)
             (getAndRemove
               [tair namespace key offset count]
               (Result. ResultCode/SUCCESS (DataEntry. 1)))
@@ -306,6 +321,19 @@
           :data []
           :fail-keys-map {}}
          (mlock tair namespace ["hello" "world"]))))
+
+(deftest test-set-count
+  (is (= success-result-code (set-count tair namespace "foo" 1)))
+  (is (= success-result-code (set-count tair namespace "foo" 1 1 1))))
+
+(deftest test-add-items
+  (is (= success-result-code (add-items tair namespace "foo" ["foo" "bar"] 1 1 1))))
+
+(deftest test-get-items
+  (is (= 1 (get-items tair namespace "foo" 1 1))))
+
+(deftest test-remove-items
+  (is (= success-result-code (remove-items tair namespace "foo" 1 1))))
 
 (deftest test-get-and-remove
   (is (= 1 (get-and-remove tair namespace "foo" 1 2))))

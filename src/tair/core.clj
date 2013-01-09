@@ -387,7 +387,7 @@
   (let [ret (.getItems tair namespace key offset count)
         ret (if (and (not (nil? ret))
                      (not (nil? (.getValue ret))))
-              (.getValue ret)
+              (-> ret .getValue .getValue)
               nil)]
     ret))
 
