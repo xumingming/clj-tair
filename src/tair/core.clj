@@ -5,7 +5,7 @@
            [com.taobao.tair.etc KeyValuePack CounterPack]
            [com.alibaba.fastjson JSON]
            [java.net URL]
-           [java.util Map List])
+           [java.util Map HashMap List])
   (:require [clojure.walk :as walk]))
 
 (declare pretify-result clojurify-result-code)
@@ -319,6 +319,149 @@
                           ret))]
     ret))
 
+;; TODO miss unit-test here.
+(defn minvalid
+  [tair namespace keys]
+  (let [result-code (.minvalid tair namespace keys)]
+    (clojurify-result-code result-code)))
+
+(defn mdelete
+  [tair namespace keys]
+  (let [result-code (.mdelete tair namespace keys)]
+    (clojurify-result-code result-code)))
+
+(defn get-range
+  [tair namespace prefix key-start key-end offset limit]
+  (let [ret (.getRange tair namespace prefix key-start key-end offset limit)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              [])
+        ret (map #(vector (.getKey %) (.getValue %)) ret)]
+    ret))
+
+(defn get-range-only-key
+  [tair namespace prefix key-start key-end offset limit]
+  (let [ret (.getRange tair namespace prefix key-start key-end offset limit)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              [])
+        ret (map #(.getKey %) ret)]
+    ret))
+
+(defn get-range-only-value
+  [tair namespace prefix key-start key-end offset limit]
+  (let [ret (.getRange tair namespace prefix key-start key-end offset limit)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              [])
+        ret (map #(.getValue %) ret)]
+    ret))
+
+(defn incr
+  [tair namespace key value default-value expire-time]
+  (let [ret (.incr tair namespace key value default-value expire-time)]
+    ret))
+
+(defn decr
+  [tair namespace key value default-value expire-time]
+  (let [ret (.decr tair namespace key value default-value expire-time)]
+    ret))
+
+(defn set-count
+  ([tair namespace key count]
+     (set-count tair namespace key count (int 0) (int 0)))
+  ([tair namespace key count version expire-time]
+     (let [result-code (.setCount tair namespace key count version expire-time)]
+       (clojurify-result-code result-code)))))
+
+(defn add-items
+  [tair namespace key items max-count version expire-time]
+  (let [result-code (.addItems tair namespace key items max-count version expire-time)]
+    (clojurify-result-code result-code)))
+
+(defn get-items
+  [tair namespace key offset count]
+  (let [ret (.getItems tair namespace key offset count)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              nil)]
+    ret))
+
+(defn remove-items
+  [tair namespace key offset count]
+  (let [result-code (.removeItems tair namespace key offset count)]
+    (clojurify-result-code result-code)))
+
+(defn get-and-remove
+  [tair namespace key offset count]
+  (let [ret (.getAndRemove tair namespace key offset count)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              nil)]
+    ret))
+
+(defn get-item-count
+  [tair namespace key]
+  (let [ret (.getItemCount tair namespace key)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              0)]
+    ret))
+
+(defn lock
+  [tair namespace key]
+  (let [result-code (.lock tair namespace key)]
+    (clojurify-result-code result-code)))
+
+(defn unlock
+  [tair namespace key]
+  (let [result-code (.unlock tair namespace key)]
+    (clojurify-result-code result-code)))
+
+(defn mlock
+  ([tair namespace keys]
+     (mlock tair namespace keys false))
+  ([tair namespace keys need-fail-keys-map?]
+     (let [[ret fail-keys-map] (if need-fail-keys-map?
+                                 (let [fail-keys-map (HashMap.)
+                                       temp-ret (.mlock tair namespace keys fail-keys-map)
+                                       fail-keys-map (into {} (map #(vector (first %)
+                                                                            (clojurify-result-code (second %)))
+                                                                   fail-keys-map))]
+                                   [temp-ret fail-keys-map])
+                                 [(.mlock tair namespace keys) {}])
+           result-code (clojurify-result-code (.getRc ret))
+           data (vec (.getValue ret))
+           ret {:rc result-code :data data :fail-keys-map fail-keys-map}]
+       ret)))
+
+(defn munlock
+  ([tair namespace keys]
+     (munlock tair namespace keys false))
+  ([tair namespace keys need-fail-keys-map?]
+     (let [[ret fail-keys-map] (if need-fail-keys-map?
+                                 (let [fail-keys-map (HashMap.)
+                                       temp-ret (.munlock tair namespace keys fail-keys-map)
+                                       fail-keys-map (into {} (map #(vector (first %)
+                                                                            (clojurify-result-code (second %)))
+                                                                   fail-keys-map))]
+                                   [temp-ret fail-keys-map])
+                                 [(.munlock tair namespace keys) {}])
+           result-code (clojurify-result-code (.getRc ret))
+           data (vec (.getValue ret))
+           ret {:rc result-code :data data :fail-keys-map fail-keys-map}]
+       ret)))
+
+(defn get-stat
+  [qtype group-name server-id]
+  (let [ret (.getStat tair qtype group-name server-id)]
+    (into {} ret)))
 
 (defn get-version [tair]
   (.getVersion tair))
