@@ -431,8 +431,8 @@
      (let [[ret fail-keys-map] (if need-fail-keys-map?
                                  (let [fail-keys-map (HashMap.)
                                        temp-ret (.mlock tair namespace keys fail-keys-map)
-                                       fail-keys-map (into {} (map #(vector (first %)
-                                                                            (clojurify-result-code (second %)))
+                                       fail-keys-map (into {} (map #(vector (.getKey %)
+                                                                            (clojurify-result-code (.getValue %)))
                                                                    fail-keys-map))]
                                    [temp-ret fail-keys-map])
                                  [(.mlock tair namespace keys) {}])

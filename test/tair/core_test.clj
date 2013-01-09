@@ -142,6 +142,13 @@
                                               "foo2" {"bar3" temp-result
                                                       "bar4" temp-result}})]
                 ret))
+            (mlock
+              [this namespace keys]
+              (Result. ResultCode/SUCCESS []))
+            (mlock
+              [this namespace keys fail-keys-map]
+              (.put fail-keys-map "bar" ResultCode/TIMEOUT)
+              (Result. ResultCode/PARTSUCC ["foo"]))
             (munlock
               [this namespace keys]
               (Result. ResultCode/SUCCESS []))
@@ -277,6 +284,16 @@
           "foo2" {"bar3" "value"
                   "bar4" "value"}}
          (mprefix-get-hiddens tair namespace {"foo1" ["bar1" "bar2"] "foo2" ["bar3" "bar4"]}))))
+
+(deftest test-mlock
+  (is (= {:rc part-success-result-code
+          :data ["foo"]
+          :fail-keys-map {"bar" (clojurify-result-code ResultCode/TIMEOUT)}}
+         (mlock tair namespace ["foo" "bar"] true)))
+  (is (= {:rc success-result-code
+          :data []
+          :fail-keys-map {}}
+         (mlock tair namespace ["hello" "world"]))))
 
 (deftest test-munlock
   (is (= {:rc part-success-result-code
