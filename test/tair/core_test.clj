@@ -114,6 +114,34 @@
                     inner-ret (Result. result-code "value")
                     out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
                 out-ret))
+            (prefixInvalid
+              [this namespace pkey skey callmode]
+              (ResultCode. 0 "success"))
+            (prefixInvalids
+              [this namespace pkey skeys callmode]
+              (let [result-code (ResultCode. 0 "success")
+                    ret (Result. result-code {"bar1" result-code
+                                              "bar2" result-code})]
+                ret))
+            (prefixHideByProxy
+              [this namespace pkey skey callmode]
+              (ResultCode. 0 "success"))
+            (prefixHidesByProxy
+              [this namespace pkey skeys callmode]
+              (let [result-code (ResultCode. 0 "success")
+                    ret (Result. result-code {"bar1" result-code
+                                              "bar2" result-code})]
+                ret))
+            (mprefixGetHiddens
+              [tair namespace p-s-keys]
+              (let [result-code (ResultCode. 0 "success")
+                    data-entry (DataEntry. "foo" "value")
+                    temp-result (Result. result-code data-entry)
+                    ret (Result. result-code {"foo1" {"bar1" temp-result
+                                                      "bar2" temp-result}
+                                              "foo2" {"bar3" temp-result
+                                                      "bar4" temp-result}})]
+                ret))
             (getVersion
               [this]
               "1.0.0")
@@ -209,6 +237,30 @@
 
 (deftest test-prefix-get-hiddens
   (is (= {"bar1" "value" "bar2" "value"} (prefix-get-hiddens tair namespace "foo" ["bar1" "bar2"]))))
+
+(deftest test-prefix-invalid
+  (is (= {:code 0 :message "success"} (prefix-invalid tair namespace "foo" "bar" :sync))))
+
+(deftest test-prefix-invalids
+  (is (= {"bar1" {:code 0 :message "success"}
+          "bar2" {:code 0 :message "success"}}
+         (prefix-invalids tair namespace "foo" ["bar1" "bar2"] :sync))))
+
+(deftest test-prefix-hide-by-proxy
+  (is (= {:code 0 :message "success"}
+         (prefix-hide-by-proxy tair namespace "foo" "bar" :sync))))
+
+(deftest test-prefix-hides-by-proxy
+  (is (= {"bar1" {:code 0 :message "success"}
+          "bar2" {:code 0 :message "success"}}
+         (prefix-hides-by-proxy tair namespace "foo" ["bar1" "bar2"] :sync))))
+
+(deftest test-mprefix-get-hiddens
+  (is (= {"foo1" {"bar1" "value"
+                  "bar2" "value"}
+          "foo2" {"bar3" "value"
+                  "bar4" "value"}}
+         (mprefix-get-hiddens tair namespace {"foo1" ["bar1" "bar2"] "foo2" ["bar3" "bar4"]}))))
 
 (deftest test-get-version
   (is (= "1.0.0" (get-version tair))))

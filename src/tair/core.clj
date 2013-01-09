@@ -263,6 +263,63 @@
         ]
     ret))
 
+(defn prefix-invalid
+  [tair namespace pkey skey callmode]
+  (let [callmode (if (= callmode :sync)
+                   CallMode/SYNC
+                   CallMode/ASYNC)
+        result-code (.prefixInvalid tair namespace pkey skey callmode)]
+    (clojurify-result-code result-code)))
+
+(defn prefix-invalids
+  [tair namespace pkey skeys callmode]
+  (let [callmode (if (= callmode :sync)
+                   CallMode/SYNC
+                   CallMode/ASYNC)
+        ret (.prefixInvalids tair namespace pkey skeys callmode)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (into {} (map #(vector (first %) (clojurify-result-code (second %)))
+                            (.getValue ret))))]
+    ret))
+
+(defn prefix-hide-by-proxy
+  [tair namespace pkey skey callmode]
+  (let [callmode (if (= callmode :sync)
+                   CallMode/SYNC
+                   CallMode/ASYNC)
+        result-code (.prefixHideByProxy tair namespace pkey skey callmode)]
+    (clojurify-result-code result-code)))
+
+(defn prefix-hides-by-proxy
+  [tair namespace pkey skeys callmode]
+  (let [callmode (if (= callmode :sync)
+                   CallMode/SYNC
+                   CallMode/ASYNC)
+        ret (.prefixHidesByProxy tair namespace pkey skeys callmode)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+
+              (into {} (map #(vector (first %) (clojurify-result-code (second %)))
+                            (.getValue ret)))
+              {})]
+    ret))
+
+(defn mprefix-get-hiddens
+  [tair namespace p-s-keys]
+  (let [ret (.mprefixGetHiddens tair namespace p-s-keys)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              {})
+        ret (into {} (map (fn [[pkey values]]
+                            [pkey
+                             (into {} (map #(vector (first %) (-> (second %) .getValue .getValue))
+                                           values))])
+                          ret))]
+    ret))
+
+
 (defn get-version [tair]
   (.getVersion tair))
 
