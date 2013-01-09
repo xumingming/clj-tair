@@ -165,6 +165,12 @@
 ;; define the test namespace
 (def namespace 99)
 
+;; success result code
+(def success-result-code (clojurify-result-code ResultCode/SUCCESS))
+
+;; part success result code
+(def part-success-result-code (clojurify-result-code ResultCode/PARTSUCC))
+
 (deftest test-get
   (is (= "bar" (get tair namespace "key"))))
 
@@ -172,46 +178,46 @@
   (is (= {"foo" "bar" "hello" "world"} (mget tair namespace ["foo" "hello"]))))
 
 (deftest test-put
-  (is (= {:code 0 :message "success"} (put tair namespace "foo" "bar")))
-  (is (= {:code 0 :message "success"} (put tair namespace "foo" "bar" 0)))
-  (is (= {:code 0 :message "success"} (put tair namespace "foo" "bar" 0 0)))
-  (is (= {:code 0 :message "success"} (put tair namespace "foo" "bar" 0 0 false))))
+  (is (= success-result-code (put tair namespace "foo" "bar")))
+  (is (= success-result-code (put tair namespace "foo" "bar" 0)))
+  (is (= success-result-code (put tair namespace "foo" "bar" 0 0)))
+  (is (= success-result-code (put tair namespace "foo" "bar" 0 0 false))))
 
 (deftest test-delete
-  (is (= {:code 0 :message "success"} (delete tair namespace "foo"))))
+  (is (= success-result-code (delete tair namespace "foo"))))
 
 (deftest test-invalid
-  (is (= {:code 0 :message "success"} (invalid tair namespace "foo")))
-  (is (= {:code 0 :message "success"} (invalid tair namespace "foo" :async))))
+  (is (= success-result-code (invalid tair namespace "foo")))
+  (is (= success-result-code (invalid tair namespace "foo" :async))))
 
 (deftest test-hide
-  (is (= {:code 0 :message "success"} (hide tair namespace "foo"))))
+  (is (= success-result-code (hide tair namespace "foo"))))
 
 (deftest test-hide-by-proxy
-  (is (= {:code 0 :message "success"} (hide-by-proxy tair namespace "foo"))))
+  (is (= success-result-code (hide-by-proxy tair namespace "foo"))))
 
 (deftest test-get-hidden
   (is (= "bar" (get-hidden tair namespace "foo"))))
 
 (deftest test-prefix-put
-  (is (= {:code 0 :message "success"} (prefix-put tair namespace "foo" "bar" "value")))
-  (is (= {:code 0 :message "success"} (prefix-put tair namespace "foo" "bar" "value" 0)))
-  (is (= {:code 0 :message "success"} (prefix-put tair namespace "foo" "bar" "value" 0 0))))
+  (is (= success-result-code (prefix-put tair namespace "foo" "bar" "value")))
+  (is (= success-result-code (prefix-put tair namespace "foo" "bar" "value" 0)))
+  (is (= success-result-code (prefix-put tair namespace "foo" "bar" "value" 0 0))))
 
 (deftest test-prefix-puts
-  (is (= {"bar1" {:code 0 :message "success"}
-          "bar2" {:code 0 :message "success"}
-          "bar3" {:code 0 :message "success"}}
+  (is (= {"bar1" success-result-code
+          "bar2" success-result-code
+          "bar3" success-result-code}
          (prefix-puts tair namespace "foo" [["bar1" "value1"]
                                             ["bar2" "value2" 0]
                                             ["bar3" "value3" 0 0]]))))
 
 (deftest test-prefix-delete
-  (is (= {:code 0 :message "success"} (prefix-delete  tair namespace "foo" "bar"))))
+  (is (= success-result-code (prefix-delete  tair namespace "foo" "bar"))))
 
 (deftest test-prefix-deletes
-  (is (= {"bar1" {:code 0 :message "success"}
-          "bar2" {:code 0 :message "success"}}
+  (is (= {"bar1" success-result-code
+          "bar2" success-result-code}
          (prefix-deletes tair namespace "foo" ["bar1" "bar2"]))))
 
 (deftest test-prefix-get
@@ -233,13 +239,13 @@
   (is (= {"bar1" 100 "bar2" 100} (prefix-decrs tair namespace "foo" [["bar1" 1 0 0] ["bar2" 1 0 0]]))))
 
 (deftest test-prefix-set-count
-  (is (= {:code 0 :message "success"} (prefix-set-count tair namespace "foo" "bar" (int 10)))))
+  (is (= success-result-code (prefix-set-count tair namespace "foo" "bar" (int 10)))))
 
 (deftest test-prefix-hide
-  (is (= {:code 0 :message "success"} (prefix-hide tair namespace "foo" "bar"))))
+  (is (= success-result-code (prefix-hide tair namespace "foo" "bar"))))
 
 (deftest test-prefix-hides
-  (is (= {"bar1" {:code 0 :message "success"} "bar2" {:code 0 :message "success"}}
+  (is (= {"bar1" success-result-code "bar2" success-result-code}
          (prefix-hides tair namespace "foo" ["bar1" "bar2"]))))
 
 (deftest test-prefix-get-hidden
@@ -249,20 +255,20 @@
   (is (= {"bar1" "value" "bar2" "value"} (prefix-get-hiddens tair namespace "foo" ["bar1" "bar2"]))))
 
 (deftest test-prefix-invalid
-  (is (= {:code 0 :message "success"} (prefix-invalid tair namespace "foo" "bar" :sync))))
+  (is (= success-result-code (prefix-invalid tair namespace "foo" "bar" :sync))))
 
 (deftest test-prefix-invalids
-  (is (= {"bar1" {:code 0 :message "success"}
-          "bar2" {:code 0 :message "success"}}
+  (is (= {"bar1" success-result-code
+          "bar2" success-result-code}
          (prefix-invalids tair namespace "foo" ["bar1" "bar2"] :sync))))
 
 (deftest test-prefix-hide-by-proxy
-  (is (= {:code 0 :message "success"}
+  (is (= success-result-code
          (prefix-hide-by-proxy tair namespace "foo" "bar" :sync))))
 
 (deftest test-prefix-hides-by-proxy
-  (is (= {"bar1" {:code 0 :message "success"}
-          "bar2" {:code 0 :message "success"}}
+  (is (= {"bar1" success-result-code
+          "bar2" success-result-code}
          (prefix-hides-by-proxy tair namespace "foo" ["bar1" "bar2"] :sync))))
 
 (deftest test-mprefix-get-hiddens
@@ -273,7 +279,7 @@
          (mprefix-get-hiddens tair namespace {"foo1" ["bar1" "bar2"] "foo2" ["bar3" "bar4"]}))))
 
 (deftest test-munlock
-  (is (= {:rc {:code 0 :message "success"} :data [] :fail-keys-map {}} (munlock tair namespace ["foo" "bar"]))))
+  (is (= {:rc success-result-code :data [] :fail-keys-map {}} (munlock tair namespace ["foo" "bar"]))))
 
 (deftest test-get-stat
   (is (= {"foo" "bar" "foo1" "bar1"}
