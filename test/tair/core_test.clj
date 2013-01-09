@@ -142,6 +142,12 @@
                                               "foo2" {"bar3" temp-result
                                                       "bar4" temp-result}})]
                 ret))
+            (lock
+              [tair namespace key]
+              ResultCode/SUCCESS)
+            (unlock
+              [tair namespace key]
+              ResultCode/SUCCESS)
             (mlock
               [this namespace keys]
               (Result. ResultCode/SUCCESS []))
@@ -294,6 +300,12 @@
           :data []
           :fail-keys-map {}}
          (mlock tair namespace ["hello" "world"]))))
+
+(deftest test-lock
+  (is (= success-result-code (lock tair namespace "foo"))))
+
+(deftest test-unlock
+  (is (= success-result-code (unlock tair namespace "foo"))))
 
 (deftest test-munlock
   (is (= {:rc part-success-result-code
