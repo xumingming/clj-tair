@@ -142,6 +142,16 @@
                                               "foo2" {"bar3" temp-result
                                                       "bar4" temp-result}})]
                 ret))
+            (munlock
+              [this namespace keys]
+              (let [success-ret (Result. ResultCode/SUCCESS [])
+                    part-success-ret (Result. ResultCode/PARTSUCC ["bar"])]
+                (if (= (first keys) "foo")
+                  success-ret
+                  part-success-ret)))
+            (getStat
+              [this qtype group-name server-id]
+              {"foo" "bar" "foo1" "bar1"})
             (getVersion
               [this]
               "1.0.0")
@@ -261,6 +271,13 @@
           "foo2" {"bar3" "value"
                   "bar4" "value"}}
          (mprefix-get-hiddens tair namespace {"foo1" ["bar1" "bar2"] "foo2" ["bar3" "bar4"]}))))
+
+(deftest test-munlock
+  (is (= {:rc {:code 0 :message "success"} :data [] :fail-keys-map {}} (munlock tair namespace ["foo" "bar"]))))
+
+(deftest test-get-stat
+  (is (= {"foo" "bar" "foo1" "bar1"}
+         (get-stat tair 1 "group-name" 1))))
 
 (deftest test-get-version
   (is (= "1.0.0" (get-version tair))))
