@@ -142,6 +142,12 @@
                                               "foo2" {"bar3" temp-result
                                                       "bar4" temp-result}})]
                 ret))
+            (getAndRemove
+              [tair namespace key offset count]
+              (Result. ResultCode/SUCCESS (DataEntry. 1)))
+            (getItemCount
+              [tair namespace key]
+              (Result. ResultCode/SUCCESS 99))
             (lock
               [tair namespace key]
               ResultCode/SUCCESS)
@@ -300,6 +306,12 @@
           :data []
           :fail-keys-map {}}
          (mlock tair namespace ["hello" "world"]))))
+
+(deftest test-get-and-remove
+  (is (= 1 (get-and-remove tair namespace "foo" 1 2))))
+
+(deftest test-get-item-count
+  (is (= 99 (get-item-count tair namespace "foo"))))
 
 (deftest test-lock
   (is (= success-result-code (lock tair namespace "foo"))))
