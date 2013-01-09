@@ -53,7 +53,42 @@
               (let [result-code (ResultCode. 0 "success")
                     ret (Result. result-code {"bar1" result-code
                                               "bar2" result-code})]
-                ret))))
+                ret))
+            (prefixGet [this namespace pkey skey]
+              (let [result-code (ResultCode. 0 "success")
+                    data-entry (doto (DataEntry.)
+                                 (.setKey "foo")
+                                 (.setValue "bar"))
+                    ret (Result. result-code data-entry)]
+                ret))
+            (prefixGets [this namespace pkey skeys]
+              (let [data-entries [(DataEntry. "bar1" "value1")
+                                  (DataEntry. "bar2" "value2")]
+                    result-code (ResultCode. 0 "success")
+                    ret (Result. result-code data-entries)]
+                ret))
+            (prefixIncr
+              [this namespace pkey skey value default-value expire-time]
+              (let [result-code (ResultCode. 0 "success")
+                    ret (Result. result-code (int 100))]
+                ret))
+            (prefixIncrs
+              [this namespace pkey skey-packs]
+              (let [result-code (ResultCode. 0 "success")
+                    inner-ret (Result. result-code (int 100))
+                    out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
+                out-ret))
+            (prefixDecr
+              [this namespace pkey skey value default-value expire-time]
+              (let [result-code (ResultCode. 0 "success")
+                    ret (Result. result-code (int 100))]
+                ret))
+            (prefixDecrs
+              [this namespace pkey skey-packs]
+              (let [result-code (ResultCode. 0 "success")
+                    inner-ret (Result. result-code (int 100))
+                    out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
+                out-ret))))
 
 ;; define the test namespace
 (def namespace 99)
@@ -84,7 +119,7 @@
   (is (= {:code 0 :message "success"} (hide-by-proxy tair namespace "foo"))))
 
 (deftest test-get-hidden
-  (is (= "bar" (get-hidden tair namespace "key"))))
+  (is (= "bar" (get-hidden tair namespace "foo"))))
 
 (deftest test-prefix-put
   (is (= {:code 0 :message "success"} (prefix-put tair namespace "foo" "bar" "value")))
@@ -106,3 +141,21 @@
   (is (= {"bar1" {:code 0 :message "success"}
           "bar2" {:code 0 :message "success"}}
          (prefix-deletes tair namespace "foo" ["bar1" "bar2"]))))
+
+(deftest test-prefix-get
+  (is (= "bar" (prefix-get tair namespace "foo" "bar"))))
+
+(deftest test-prefix-gets
+  (is (= {"bar1" "value1" "bar2" "value2"} (prefix-gets  tair namespace "foo" ["bar1" "bar2"]))))
+
+(deftest test-prefix-incr
+  (is (= 100 (prefix-incr tair namespace "foo" "bar" 1 0 0))))
+
+(deftest test-prefix-incrs
+  (is (= {"bar1" 100 "bar2" 100} (prefix-incrs tair namespace "foo" [["bar1" 1 0 0] ["bar2" 1 0 0]]))))
+
+(deftest test-prefix-decr
+  (is (= 100 (prefix-decr tair namespace "foo" "bar" 1 0 0))))
+
+(deftest test-prefix-decrs
+  (is (= {"bar1" 100 "bar2" 100} (prefix-decrs tair namespace "foo" [["bar1" 1 0 0] ["bar2" 1 0 0]]))))

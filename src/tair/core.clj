@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [get])
   (:import [com.taobao.tair TairManager ResultCode CallMode]
            [com.taobao.tair.impl.mc MultiClusterTairManager]
-           [com.taobao.tair.etc KeyValuePack]
+           [com.taobao.tair.etc KeyValuePack CounterPack]
            [com.alibaba.fastjson JSON]
            [java.net URL]
            [java.util Map List])
@@ -148,6 +148,74 @@
         result (if (and (not (nil? result))
                         (not (nil? (.getValue result))))
                  (into {} (map #(vector (first %) (clojurify-result-code (second %))) (.getValue result)))
+                 {})]
+    result))
+
+(defn prefix-get
+  [tair namespace pkey skey]
+  (let [obj (.prefixGet tair namespace pkey skey)
+        obj (if (and (not (nil? obj))
+                     (not (nil? (-> obj .getValue)))
+                     (not (nil? (-> obj .getValue .getValue))))
+              (-> obj .getValue
+                  .getValue
+                  pretify-result)
+              nil)]
+    obj))
+
+(defn prefix-gets
+  [tair namespace pkey skeys]
+  (let [ret (.prefixGets tair namespace pkey (vec skeys))
+        ret (if (and (not (nil? ret))
+                     (not (nil? (-> ret .getValue))))
+              (into {} (map #(vector (.getKey %) (.getValue %)) (.getValue ret)))
+              nil)
+        ]
+    ret))
+
+(defn prefix-incr
+  [tair namespace pkey skey value default-value expire-time]
+  (let [obj (.prefixIncr tair namespace pkey skey value default-value expire-time)
+        obj (if (and (not (nil? obj))
+                     (not (nil? (-> obj .getValue))))
+              (-> obj .getValue
+                  pretify-result)
+              nil)]
+    obj))
+
+(defn prefix-incrs
+  [tair namespace pkey skey-packs]
+  (let [skey-packs (map (fn [key-pack]
+                                (case (count key-pack)
+                                  3 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2))
+                                  4 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2) (nth key-pack 3)))) skey-packs)
+        result (.prefixIncrs tair namespace pkey skey-packs)
+        result (if (and (not (nil? result))
+                        (not (nil? (.getValue result))))
+                 (into {} (map #(vector (first %) (.getValue (second %))) (.getValue result)))
+                 {})]
+    result))
+
+(defn prefix-decr
+  [tair namespace pkey skey value default-value expire-time]
+  (let [obj (.prefixDecr tair namespace pkey skey value default-value expire-time)
+        obj (if (and (not (nil? obj))
+                     (not (nil? (-> obj .getValue))))
+              (-> obj .getValue
+                  pretify-result)
+              nil)]
+    obj))
+
+(defn prefix-decrs
+  [tair namespace pkey skey-packs]
+  (let [skey-packs (map (fn [key-pack]
+                                (case (count key-pack)
+                                  3 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2))
+                                  4 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2) (nth key-pack 3)))) skey-packs)
+        result (.prefixDecrs tair namespace pkey skey-packs)
+        result (if (and (not (nil? result))
+                        (not (nil? (.getValue result))))
+                 (into {} (map #(vector (first %) (.getValue (second %))) (.getValue result)))
                  {})]
     result))
 
