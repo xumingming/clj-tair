@@ -89,6 +89,31 @@
                     inner-ret (Result. result-code (int 100))
                     out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
                 out-ret))
+            (prefixSetCount
+              [this namespace pkey skey count version expire-time]
+              (ResultCode. 0 "success"))
+            (prefixHide
+              [this namespace pkey skey]
+              (ResultCode. 0 "success"))
+            (prefixHides
+              [this namespace pkey skeys]
+              (let [result-code (ResultCode. 0 "success")
+                    ret (Result. result-code {"bar1" result-code "bar2" result-code})]
+                ret))
+            (prefixGetHidden
+              [this namespace pkey skey]
+              (let [result-code (ResultCode. 0 "success")
+                    data-entry (doto (DataEntry.)
+                                 (.setKey "foo")
+                                 (.setValue "bar"))
+                    ret (Result. result-code data-entry)]
+                ret))
+            (prefixGetHiddens
+              [this namespace pkey skeys]
+              (let [result-code (ResultCode. 0 "success")
+                    inner-ret (Result. result-code "value")
+                    out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
+                out-ret))
             (getVersion
               [this]
               "1.0.0")
@@ -168,6 +193,22 @@
 
 (deftest test-prefix-decrs
   (is (= {"bar1" 100 "bar2" 100} (prefix-decrs tair namespace "foo" [["bar1" 1 0 0] ["bar2" 1 0 0]]))))
+
+(deftest test-prefix-set-count
+  (is (= {:code 0 :message "success"} (prefix-set-count tair namespace "foo" "bar" (int 10)))))
+
+(deftest test-prefix-hide
+  (is (= {:code 0 :message "success"} (prefix-hide tair namespace "foo" "bar"))))
+
+(deftest test-prefix-hides
+  (is (= {"bar1" {:code 0 :message "success"} "bar2" {:code 0 :message "success"}}
+         (prefix-hides tair namespace "foo" ["bar1" "bar2"]))))
+
+(deftest test-prefix-get-hidden
+  (is (= "bar" (prefix-get-hidden tair namespace "foo" "bar"))))
+
+(deftest test-prefix-get-hiddens
+  (is (= {"bar1" "value" "bar2" "value"} (prefix-get-hiddens tair namespace "foo" ["bar1" "bar2"]))))
 
 (deftest test-get-version
   (is (= "1.0.0" (get-version tair))))

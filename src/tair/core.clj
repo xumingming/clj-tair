@@ -219,6 +219,50 @@
                  {})]
     result))
 
+(defn prefix-set-count
+  ([tair namespace pkey skey count]
+     (prefix-set-count tair namespace pkey skey count 0 0))
+  ([tair namespace pkey skey count version expire-time]
+     (let [result-code (.prefixSetCount tair namespace pkey skey count version expire-time)]
+       (clojurify-result-code result-code))))
+
+(defn prefix-hide
+  [tair namespace pkey skey]
+  (let [result-code (.prefixHide tair namespace pkey skey)]
+    (clojurify-result-code result-code)))
+
+(defn prefix-hides
+  [tair namespace pkey skeys]
+  (let [ret (.prefixHides tair namespace pkey skeys)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              {})
+        ret (into {} (map #(vector (first %) (clojurify-result-code (second %))) ret))]
+    ret))
+
+(defn prefix-get-hidden
+  [tair namespace pkey skey]
+  (let [ret (.prefixGetHidden tair namespace pkey skey)
+        ret (if (and (not (nil? ret))
+                     (not (nil? (-> ret .getValue)))
+                     (not (nil? (-> ret .getValue .getValue))))
+              (-> ret .getValue
+                  .getValue
+                  pretify-result)
+              nil)]
+    ret))
+
+(defn prefix-get-hiddens
+  [tair namespace pkey skeys]
+  (let [ret (.prefixGetHiddens tair namespace pkey (vec skeys))
+        ret (if (and (not (nil? ret))
+                     (not (nil? (-> ret .getValue))))
+              (into {} (map #(vector (.getKey %) (-> % .getValue .getValue pretify-result)) (.getValue ret)))
+              nil)
+        ]
+    ret))
+
 (defn get-version [tair]
   (.getVersion tair))
 
