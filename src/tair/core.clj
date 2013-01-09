@@ -375,7 +375,7 @@
      (set-count tair namespace key count (int 0) (int 0)))
   ([tair namespace key count version expire-time]
      (let [result-code (.setCount tair namespace key count version expire-time)]
-       (clojurify-result-code result-code)))))
+       (clojurify-result-code result-code))))
 
 (defn add-items
   [tair namespace key items max-count version expire-time]
@@ -459,7 +459,7 @@
        ret)))
 
 (defn get-stat
-  [qtype group-name server-id]
+  [tair qtype group-name server-id]
   (let [ret (.getStat tair qtype group-name server-id)]
     (into {} ret)))
 
