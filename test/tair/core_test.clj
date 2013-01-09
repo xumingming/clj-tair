@@ -144,11 +144,11 @@
                 ret))
             (munlock
               [this namespace keys]
-              (let [success-ret (Result. ResultCode/SUCCESS [])
-                    part-success-ret (Result. ResultCode/PARTSUCC ["bar"])]
-                (if (= (first keys) "foo")
-                  success-ret
-                  part-success-ret)))
+              (Result. ResultCode/SUCCESS []))
+            (munlock
+              [this namespace keys fail-keys-map]
+              (.put fail-keys-map "bar" ResultCode/TIMEOUT)
+              (Result. ResultCode/PARTSUCC ["foo"]))
             (getStat
               [this qtype group-name server-id]
               {"foo" "bar" "foo1" "bar1"})
@@ -279,7 +279,14 @@
          (mprefix-get-hiddens tair namespace {"foo1" ["bar1" "bar2"] "foo2" ["bar3" "bar4"]}))))
 
 (deftest test-munlock
-  (is (= {:rc success-result-code :data [] :fail-keys-map {}} (munlock tair namespace ["foo" "bar"]))))
+  (is (= {:rc part-success-result-code
+          :data ["foo"]
+          :fail-keys-map {"bar" (clojurify-result-code ResultCode/TIMEOUT)}}
+         (munlock tair namespace ["foo" "bar"] true)))
+  (is (= {:rc success-result-code
+          :data []
+          :fail-keys-map {}}
+         (munlock tair namespace ["hello" "world"]))))
 
 (deftest test-get-stat
   (is (= {"foo" "bar" "foo1" "bar1"}
