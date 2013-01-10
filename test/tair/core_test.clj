@@ -142,6 +142,12 @@
                                               "foo2" {"bar3" temp-result
                                                       "bar4" temp-result}})]
                 ret))
+            (minvalid
+              [tair namespace keys]
+              ResultCode/SUCCESS)
+            (mdelete
+              [tair namespace keys]
+              ResultCode/SUCCESS)
             (setCount
               [tair namespace key count]
               ResultCode/SUCCESS)
@@ -311,6 +317,12 @@
           "foo2" {"bar3" "value"
                   "bar4" "value"}}
          (mprefix-get-hiddens tair namespace {"foo1" ["bar1" "bar2"] "foo2" ["bar3" "bar4"]}))))
+
+(deftest test-minvalid
+  (is (= success-result-code (minvalid tair namespace ["foo"]))))
+
+(deftest test-mdelete
+  (is (= success-result-code (mdelete tair namespace ["foo"]))))
 
 (deftest test-mlock
   (is (= {:rc part-success-result-code
