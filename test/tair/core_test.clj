@@ -8,22 +8,15 @@
 ;; define the mock tair
 (def tair (reify TairManager
             (get [this namespace key]
-              (let [result-code ResultCode/SUCCESS
-                    data-entry (doto (DataEntry.)
-                                 (.setKey "foo")
-                                 (.setValue "bar"))
-                    ret (Result. result-code data-entry)]
-                ret))
+              (Result. ResultCode/SUCCESS (doto (DataEntry.)
+                                            (.setKey "foo")
+                                            (.setValue "bar"))))
             (^ResultCode put [this ^int namespace ^Serializable key ^Serializable value
                               ^int version ^int expire-time ^boolean fill-cache?]
-              (let [^ResultCode result-code ResultCode/SUCCESS]
-                result-code))
+              ResultCode/SUCCESS)
             (mget [this namespace keys]
-              (let [data-entries [(DataEntry. "foo" "bar")
-                                  (DataEntry. "hello" "world")]
-                    result-code ResultCode/SUCCESS
-                    ret (Result. result-code data-entries)]
-                ret))
+              (Result. ResultCode/SUCCESS [(DataEntry. "foo" "bar")
+                                           (DataEntry. "hello" "world")]))
             (delete [this namespace key]
               ResultCode/SUCCESS)
             (invalid [this namespace key callmode]
@@ -33,61 +26,43 @@
             (hideByProxy [this namespace key callmode]
               ResultCode/SUCCESS)
             (getHidden [this namespace key]
-              (let [result-code ResultCode/SUCCESS
-                    data-entry (doto (DataEntry.)
-                                 (.setKey "foo")
-                                 (.setValue "bar"))
-                    ret (Result. result-code data-entry)]
-                ret))
+              (Result. ResultCode/SUCCESS (doto (DataEntry.)
+                                            (.setKey "foo")
+                                            (.setValue "bar"))))
             (prefixPut [this namespace pkey skey value version expire-time]
               ResultCode/SUCCESS)
             (prefixPuts [this namespace pkey skey-value-packs]
-              (let [result-code ResultCode/SUCCESS
-                    ret (Result. result-code {"bar1" result-code
-                                              "bar2" result-code
-                                              "bar3" result-code})]
-                ret))
+              (Result. ResultCode/SUCCESS {"bar1" ResultCode/SUCCESS
+                                           "bar2" ResultCode/SUCCESS
+                                           "bar3" ResultCode/SUCCESS}))
             (prefixDelete [this namespace pkey skey]
               ResultCode/SUCCESS)
             (prefixDeletes [this namespace pkey skeys]
-              (let [result-code ResultCode/SUCCESS
-                    ret (Result. result-code {"bar1" result-code
-                                              "bar2" result-code})]
-                ret))
+              (Result. ResultCode/SUCCESS {"bar1" ResultCode/SUCCESS
+                                           "bar2" ResultCode/SUCCESS}))
             (prefixGet [this namespace pkey skey]
-              (let [result-code ResultCode/SUCCESS
-                    data-entry (doto (DataEntry.)
-                                 (.setKey "foo")
-                                 (.setValue "bar"))
-                    ret (Result. result-code data-entry)]
-                ret))
+              (Result. ResultCode/SUCCESS (doto (DataEntry.)
+                                            (.setKey "foo")
+                                            (.setValue "bar"))))
             (prefixGets [this namespace pkey skeys]
-              (let [data-entries {"bar1" (DataEntry. "bar1" "value1")
-                                  "bar2" (DataEntry. "bar2" "value2")}
-                    ret (Result. ResultCode/SUCCESS data-entries)]
-                ret))
+              (Result. ResultCode/SUCCESS {"bar1" (DataEntry. "bar1" "value1")
+                                           "bar2" (DataEntry. "bar2" "value2")}))
             (prefixIncr
               [this namespace pkey skey value default-value expire-time]
-              (let [result-code ResultCode/SUCCESS
-                    ret (Result. result-code (int 100))]
-                ret))
+              (Result. ResultCode/SUCCESS (int 100)))
             (prefixIncrs
               [this namespace pkey skey-packs]
-              (let [result-code ResultCode/SUCCESS
-                    inner-ret (Result. result-code (int 100))
-                    out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
-                out-ret))
+              (Result. ResultCode/SUCCESS
+                       {"bar1" (Result. ResultCode/SUCCESS (int 100))
+                        "bar2" (Result. ResultCode/SUCCESS (int 100))}))
             (prefixDecr
               [this namespace pkey skey value default-value expire-time]
-              (let [result-code ResultCode/SUCCESS
-                    ret (Result. result-code (int 100))]
-                ret))
+              (Result. ResultCode/SUCCESS (int 100)))
             (prefixDecrs
               [this namespace pkey skey-packs]
-              (let [result-code ResultCode/SUCCESS
-                    inner-ret (Result. result-code (int 100))
-                    out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
-                out-ret))
+              (Result. ResultCode/SUCCESS
+                       {"bar1" (Result. ResultCode/SUCCESS (int 100))
+                        "bar2" (Result. ResultCode/SUCCESS (int 100))}))
             (prefixSetCount
               [this namespace pkey skey count version expire-time]
               ResultCode/SUCCESS)
@@ -96,51 +71,43 @@
               ResultCode/SUCCESS)
             (prefixHides
               [this namespace pkey skeys]
-              (let [result-code ResultCode/SUCCESS
-                    ret (Result. result-code {"bar1" result-code "bar2" result-code})]
-                ret))
+              (Result. ResultCode/SUCCESS
+                       {"bar1" ResultCode/SUCCESS
+                        "bar2" ResultCode/SUCCESS}))
             (prefixGetHidden
               [this namespace pkey skey]
-              (let [result-code ResultCode/SUCCESS
-                    data-entry (doto (DataEntry.)
-                                 (.setKey "foo")
-                                 (.setValue "bar"))
-                    ret (Result. result-code data-entry)]
-                ret))
+              (Result. ResultCode/SUCCESS
+                       (doto (DataEntry.)
+                         (.setKey "foo")
+                         (.setValue "bar"))))
             (prefixGetHiddens
               [this namespace pkey skeys]
-              (let [result-code ResultCode/SUCCESS
-                    inner-ret (Result. result-code "value")
-                    out-ret (Result. result-code {"bar1" inner-ret "bar2" inner-ret})]
-                out-ret))
+              (Result. ResultCode/SUCCESS
+                       {"bar1" (Result. ResultCode/SUCCESS "value") 
+                        "bar2" (Result. ResultCode/SUCCESS "value") }))
             (prefixInvalid
               [this namespace pkey skey callmode]
               ResultCode/SUCCESS)
             (prefixInvalids
               [this namespace pkey skeys callmode]
-              (let [result-code ResultCode/SUCCESS
-                    ret (Result. result-code {"bar1" result-code
-                                              "bar2" result-code})]
-                ret))
+              (Result. ResultCode/SUCCESS
+                       {"bar1" ResultCode/SUCCESS
+                        "bar2" ResultCode/SUCCESS}))
             (prefixHideByProxy
               [this namespace pkey skey callmode]
               ResultCode/SUCCESS)
             (prefixHidesByProxy
               [this namespace pkey skeys callmode]
-              (let [result-code ResultCode/SUCCESS
-                    ret (Result. result-code {"bar1" result-code
-                                              "bar2" result-code})]
-                ret))
+              (Result. ResultCode/SUCCESS
+                       {"bar1" ResultCode/SUCCESS
+                        "bar2" ResultCode/SUCCESS}))
             (mprefixGetHiddens
               [tair namespace p-s-keys]
-              (let [result-code ResultCode/SUCCESS
-                    data-entry (DataEntry. "foo" "value")
-                    temp-result (Result. result-code data-entry)
-                    ret (Result. result-code {"foo1" {"bar1" temp-result
-                                                      "bar2" temp-result}
-                                              "foo2" {"bar3" temp-result
-                                                      "bar4" temp-result}})]
-                ret))
+              (Result. ResultCode/SUCCESS
+                       {"foo1" {"bar1" (Result. ResultCode/SUCCESS (DataEntry. "foo" "value"))
+                                "bar2" (Result. ResultCode/SUCCESS (DataEntry. "foo" "value"))}
+                        "foo2" {"bar3" (Result. ResultCode/SUCCESS (DataEntry. "foo" "value"))
+                                "bar4" (Result. ResultCode/SUCCESS (DataEntry. "foo" "value"))}}))
             (minvalid
               [tair namespace keys]
               ResultCode/SUCCESS)
@@ -149,22 +116,17 @@
               ResultCode/SUCCESS)
             (getRange
               [tair namespace prefix key-start key-end offset limit]
-              (let [entries [(DataEntry. "foo" "bar")
-                             (DataEntry. "hello" "world")]
-                    ret (Result. ResultCode/SUCCESS entries)]
-                ret))
+              (Result. ResultCode/SUCCESS
+                       [(DataEntry. "foo" "bar")
+                        (DataEntry. "hello" "world")]))
             (getRangeOnlyKey
               [tair namespace prefix key-start key-end offset limit]
-              (let [entries [(DataEntry. "foo" "bar")
-                             (DataEntry. "hello" "world")]
-                    ret (Result. ResultCode/SUCCESS entries)]
-                ret))
+              (Result. ResultCode/SUCCESS [(DataEntry. "foo" "bar")
+                                           (DataEntry. "hello" "world")]))
             (getRangeOnlyValue
               [tair namespace prefix key-start key-end offset limit]
-              (let [entries [(DataEntry. "foo" "bar")
-                             (DataEntry. "hello" "world")]
-                    ret (Result. ResultCode/SUCCESS entries)]
-                ret))
+              (Result. ResultCode/SUCCESS [(DataEntry. "foo" "bar")
+                                           (DataEntry. "hello" "world")]))
             (incr
               [tair namespace key value default-value expire-time]
               (Result. ResultCode/SUCCESS 99))
