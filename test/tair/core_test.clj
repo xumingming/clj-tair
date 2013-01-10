@@ -148,6 +148,24 @@
             (mdelete
               [tair namespace keys]
               ResultCode/SUCCESS)
+            (getRange
+              [tair namespace prefix key-start key-end offset limit]
+              (let [entries [(DataEntry. "foo" "bar")
+                             (DataEntry. "hello" "world")]
+                    ret (Result. ResultCode/SUCCESS entries)]
+                ret))
+            (getRangeOnlyKey
+              [tair namespace prefix key-start key-end offset limit]
+              (let [entries [(DataEntry. "foo" "bar")
+                             (DataEntry. "hello" "world")]
+                    ret (Result. ResultCode/SUCCESS entries)]
+                ret))
+            (getRangeOnlyValue
+              [tair namespace prefix key-start key-end offset limit]
+              (let [entries [(DataEntry. "foo" "bar")
+                             (DataEntry. "hello" "world")]
+                    ret (Result. ResultCode/SUCCESS entries)]
+                ret))
             (setCount
               [tair namespace key count]
               ResultCode/SUCCESS)
@@ -323,6 +341,15 @@
 
 (deftest test-mdelete
   (is (= success-result-code (mdelete tair namespace ["foo"]))))
+
+(deftest test-get-range
+  (is (= '(["foo" "bar"] ["hello" "world"]) (get-range tair namespace "foo" "1" "2" 1 1))))
+
+(deftest test-get-range-only-key
+  (is (= '("foo" "hello") (get-range-only-key tair namespace "foo" "1" "2" 1 1))))
+
+(deftest test-get-range-only-value
+  (is (= '("bar" "world") (get-range-only-value tair namespace "foo" "1" "2" 1 1))))
 
 (deftest test-mlock
   (is (= {:rc part-success-result-code
