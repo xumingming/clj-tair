@@ -363,12 +363,12 @@
 (defn incr
   [tair namespace key value default-value expire-time]
   (let [ret (.incr tair namespace key value default-value expire-time)]
-    ret))
+    (.getValue ret)))
 
 (defn decr
   [tair namespace key value default-value expire-time]
   (let [ret (.decr tair namespace key value default-value expire-time)]
-    ret))
+    (.getValue ret)))
 
 (defn set-count
   ([tair namespace key count]

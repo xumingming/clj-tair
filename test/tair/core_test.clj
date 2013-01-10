@@ -166,6 +166,12 @@
                              (DataEntry. "hello" "world")]
                     ret (Result. ResultCode/SUCCESS entries)]
                 ret))
+            (incr
+              [tair namespace key value default-value expire-time]
+              (Result. ResultCode/SUCCESS 99))
+            (decr
+              [tair namespace key value default-value expire-time]
+              (Result. ResultCode/SUCCESS 99))
             (setCount
               [tair namespace key count]
               ResultCode/SUCCESS)
@@ -360,6 +366,12 @@
           :data []
           :fail-keys-map {}}
          (mlock tair namespace ["hello" "world"]))))
+
+(deftest test-incr
+  (is (= 99 (incr tair namespace "foo" 1 0 0))))
+
+(deftest test-decr
+  (is (= 99 (decr tair namespace "foo" 1 0 0))))
 
 (deftest test-set-count
   (is (= success-result-code (set-count tair namespace "foo" 1)))
