@@ -1,7 +1,8 @@
 (ns tair.core
   (:refer-clojure :exclude [get])
   (:import [com.taobao.tair TairManager ResultCode CallMode]
-           [com.taobao.tair Result DataEntry]
+           [com.taobao.tair Result DataEntry TairCallback]
+           [com.taobao.tair.packet BasePacket]
            [com.taobao.tair.impl.mc MultiClusterTairManager]
            [com.taobao.tair.etc KeyValuePack CounterPack]
            [com.alibaba.fastjson JSON]
@@ -64,8 +65,12 @@
        result-code)))
 
 (defn put-async
-  [^TairManager tair namespace key value version expire-time fill-cache? callback]
-  nil)
+  [^TairManager tair namespace key value version expire-time fill-cache?
+   callback-base-packet-fn callback-exception-fn]
+  (let [tair-callback nil
+        result-code (.putAsync tair namespace key value version expire-time
+                               fill-cache? tair-callback)]
+    (clojurify-result-code result-code)))
 
 (defn delete
   "Delete the specified key from tair"

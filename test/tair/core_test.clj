@@ -11,8 +11,11 @@
               (Result. ResultCode/SUCCESS (doto (DataEntry.)
                                             (.setKey "foo")
                                             (.setValue "bar"))))
-            (^ResultCode put [this ^int namespace ^Serializable key ^Serializable value
-                              ^int version ^int expire-time ^boolean fill-cache?]
+            (put [this namespace key value
+                  version expire-time fill-cache?]
+              ResultCode/SUCCESS)
+            (putAsync [this namespace key value
+                  version expire-time fill-cache? tair-callback]
               ResultCode/SUCCESS)
             (mget [this namespace keys]
               (Result. ResultCode/SUCCESS [(DataEntry. "foo" "bar")
@@ -29,6 +32,7 @@
               (Result. ResultCode/SUCCESS (doto (DataEntry.)
                                             (.setKey "foo")
                                             (.setValue "bar"))))
+
             (prefixPut [this namespace pkey skey value version expire-time]
               ResultCode/SUCCESS)
             (prefixPuts [this namespace pkey skey-value-packs]
@@ -207,6 +211,9 @@
   (is (= success-result-code (put tair namespace "foo" "bar" 0)))
   (is (= success-result-code (put tair namespace "foo" "bar" 0 0)))
   (is (= success-result-code (put tair namespace "foo" "bar" 0 0 false))))
+
+(deftest test-put-async
+  (is (= success-result-code (put-async tair namespace "foo" "bar" 0 0 false nil nil))))
 
 (deftest test-delete
   (is (= success-result-code (delete tair namespace "foo"))))
