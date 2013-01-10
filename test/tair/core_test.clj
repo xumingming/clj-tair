@@ -2,8 +2,8 @@
   (refer-clojure :exclude [get namespace])
   (:import [com.taobao.tair TairManager Result DataEntry ResultCode])
   (:import [java.io Serializable])
-  (:use [tair.core])
-  (:use [clojure.test]))
+  (:require [tair.core :refer :all])
+  (:require [clojure.test :refer :all]))
 
 ;; define the mock tair
 (def tair (reify TairManager
