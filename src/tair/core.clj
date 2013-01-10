@@ -67,7 +67,15 @@
 (defn put-async
   [^TairManager tair namespace key value version expire-time fill-cache?
    callback-base-packet-fn callback-exception-fn]
-  (let [tair-callback nil
+  (let [tair-callback (reify TairCallback
+                        (^void callback [this ^BasePacket packet]
+                          (if callback-base-packet-fn
+                            (callback-base-packet-fn packet)
+                            nil))
+                        (^void callback [this ^Exception e]
+                          (if callback-exception-fn
+                            (callback-exception-fn e)
+                            nil)))
         result-code (.putAsync tair namespace key value version expire-time
                                fill-cache? tair-callback)]
     (clojurify-result-code result-code)))
