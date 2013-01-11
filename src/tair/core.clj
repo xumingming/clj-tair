@@ -21,15 +21,33 @@
            (.setDynamicConfig dynamic?)
            (.init))))
 
-(defn- validate-data-entry-result [^Result result]
-  (and (not (nil? result))
-       (not (nil? (.getValue ^Result result)))
-       (not (nil? (.getValue ^DataEntry (.getValue result))))))
-
 (defn- get-data-entry [^Result result]
-  (if (validate-data-entry-result result)
+  (if (and (not (nil? result))
+           (not (nil? (.getValue ^Result result)))
+           (not (nil? (.getValue ^DataEntry (.getValue result)))))
     (pretify-result (.getValue ^DataEntry (.getValue result)))
     nil))
+
+(defn- get-data-entry-list [^Result ret]
+  (if (and (not (nil? ret))
+           (not (nil? (-> ret .getValue))))
+    (into {} (map #(vector (.getKey ^DataEntry %) (.getValue ^DataEntry %)) (.getValue ret)))
+    nil))
+
+(defn- get-object->resultcode-map [^Result ret]
+  (let [ret (if (and (not (nil? ret))
+                     (not (nil? (.getValue ret))))
+              (.getValue ret)
+              {})
+        ret (into {} (map #(vector (first %) (clojurify-result-code (second %))) ret))]
+    ret))
+
+(defn- get-object->result-map [^Result result]
+  (let [result (if (and (not (nil? result))
+                        (not (nil? (.getValue result))))
+                 (into {} (map #(vector (first %) (.getValue ^Result (second %))) (.getValue result)))
+                 {})]
+    result))
 
 (defn get
   "Query the value of the specified key from the specified namespace."
@@ -45,11 +63,7 @@
   keys: a collection of keys to get"
   [^TairManager tair namespace keys]
   (let [^Result ret (.mget tair namespace (vec keys))
-        ret (if (and (not (nil? ret))
-                     (not (nil? (-> ret .getValue))))
-              (into {} (map #(vector (.getKey ^DataEntry %) (.getValue ^DataEntry %)) (.getValue ret)))
-              nil)
-        ]
+        ret (get-data-entry-list ret)]
     ret))
 
 (defn put
@@ -142,10 +156,7 @@
                                   3 (KeyValuePack. (first key-value-pack) (second key-value-pack) (nth key-value-pack 2))
                                   4 (KeyValuePack. (first key-value-pack) (second key-value-pack) (nth key-value-pack 2) (nth key-value-pack 3)))) skey-value-packs)
         result (.prefixPuts tair namespace pkey skey-value-packs)
-        result (if (and (not (nil? result))
-                        (not (nil? (.getValue result))))
-                 (into {} (map #(vector (first %) (clojurify-result-code (second %))) (.getValue result)))
-                 {})]
+        result (get-object->resultcode-map result)]
     result))
 
 (defn prefix-delete
@@ -156,10 +167,7 @@
 (defn prefix-deletes
   [^TairManager tair namespace pkey skeys]
   (let [result (.prefixDeletes tair namespace pkey skeys)
-        result (if (and (not (nil? result))
-                        (not (nil? (.getValue result))))
-                 (into {} (map #(vector (first %) (clojurify-result-code (second %))) (.getValue result)))
-                 {})]
+        result (get-object->resultcode-map result)]
     result))
 
 (defn prefix-get
@@ -195,10 +203,7 @@
                                   3 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2))
                                   4 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2) (nth key-pack 3)))) skey-packs)
         ^Result result (.prefixIncrs tair namespace pkey skey-packs)
-        result (if (and (not (nil? result))
-                        (not (nil? (.getValue result))))
-                 (into {} (map #(vector (first %) (.getValue ^Result (second %))) (.getValue result)))
-                 {})]
+        result (get-object->result-map result)]
     result))
 
 (defn prefix-decr
@@ -218,10 +223,7 @@
                                   3 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2))
                                   4 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2) (nth key-pack 3)))) skey-packs)
         ^Result result (.prefixDecrs tair namespace pkey skey-packs)
-        result (if (and (not (nil? result))
-                        (not (nil? (.getValue result))))
-                 (into {} (map #(vector (first %) (.getValue ^Result (second %))) (.getValue result)))
-                 {})]
+        result (get-object->result-map result)]
     result))
 
 (defn prefix-set-count
@@ -239,11 +241,7 @@
 (defn prefix-hides
   [^TairManager tair namespace pkey skeys]
   (let [ret (.prefixHides tair namespace pkey skeys)
-        ret (if (and (not (nil? ret))
-                     (not (nil? (.getValue ret))))
-              (.getValue ret)
-              {})
-        ret (into {} (map #(vector (first %) (clojurify-result-code (second %))) ret))]
+        ret (get-object->resultcode-map ret)]
     ret))
 
 (defn prefix-get-hidden
@@ -278,10 +276,7 @@
                    CallMode/SYNC
                    CallMode/ASYNC)
         ret (.prefixInvalids tair namespace pkey skeys callmode)
-        ret (if (and (not (nil? ret))
-                     (not (nil? (.getValue ret))))
-              (into {} (map #(vector (first %) (clojurify-result-code (second %)))
-                            (.getValue ret))))]
+        ret (get-object->resultcode-map ret)]
     ret))
 
 (defn prefix-hide-by-proxy
@@ -298,12 +293,7 @@
                    CallMode/SYNC
                    CallMode/ASYNC)
         ret (.prefixHidesByProxy tair namespace pkey skeys callmode)
-        ret (if (and (not (nil? ret))
-                     (not (nil? (.getValue ret))))
-
-              (into {} (map #(vector (first %) (clojurify-result-code (second %)))
-                            (.getValue ret)))
-              {})]
+        ret (get-object->resultcode-map ret)]
     ret))
 
 (defn mprefix-get-hiddens
@@ -489,4 +479,3 @@
 
 (defn pretify-result [obj]
   (-> obj object-to-json clojurify-structure))
-
