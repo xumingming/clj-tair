@@ -21,16 +21,21 @@
            (.setDynamicConfig dynamic?)
            (.init))))
 
+(defn- validate-data-entry-result [^Result result]
+  (and (not (nil? result))
+       (not (nil? (.getValue ^Result result)))
+       (not (nil? (.getValue ^DataEntry (.getValue result))))))
+
+(defn- get-data-entry [^Result result]
+  (if (validate-data-entry-result result)
+    (pretify-result (.getValue ^DataEntry (.getValue result)))
+    nil))
+
 (defn get
   "Query the value of the specified key from the specified namespace."
   [^TairManager tair namespace key]
-  (let [^Result obj (.get tair namespace key)
-        obj (if (and (not (nil? obj))
-                     (not (nil? (-> ^Result obj .getValue)))
-                     (not (nil? (-> ^DataEntry (.getValue obj) .getValue))))
-              (-> ^DataEntry (.getValue obj) .getValue pretify-result)
-              nil)]
-    obj))
+  (let [^Result ret (.get tair namespace key)]
+    (get-data-entry ret)))
 
 (defn mget
   "Batch get data from tair
@@ -117,11 +122,7 @@
 (defn get-hidden
   [^TairManager tair namespace key]
   (let [^Result obj (.getHidden tair namespace key)
-        obj (if (and (not (nil? obj))
-                     (not (nil? (-> obj .getValue)))
-                     (not (nil? (-> ^DataEntry (.getValue obj) .getValue))))
-              (-> ^DataEntry (.getValue obj) .getValue pretify-result)
-              nil)]
+        obj (get-data-entry obj)]
     obj))
 
 (defn prefix-put
@@ -164,11 +165,7 @@
 (defn prefix-get
   [^TairManager tair namespace pkey skey]
   (let [^Result obj (.prefixGet tair namespace pkey skey)
-        obj (if (and (not (nil? obj))
-                     (not (nil? (-> obj .getValue)))
-                     (not (nil? (-> ^DataEntry (.getValue obj) .getValue))))
-              (-> ^DataEntry (.getValue obj) .getValue pretify-result)
-              nil)]
+        obj (get-data-entry obj)]
     obj))
 
 (defn prefix-gets
@@ -252,11 +249,7 @@
 (defn prefix-get-hidden
   [^TairManager tair namespace pkey skey]
   (let [^Result ret (.prefixGetHidden tair namespace pkey skey)
-        ret (if (and (not (nil? ret))
-                     (not (nil? (-> ret .getValue)))
-                     (not (nil? (-> ^DataEntry (.getValue ret) .getValue))))
-              (-> ^DataEntry (.getValue ret) .getValue pretify-result)
-              nil)]
+        ret (get-data-entry ret)]
     ret))
 
 (defn prefix-get-hiddens
