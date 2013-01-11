@@ -31,8 +31,8 @@
 (defn- get-data-entry-list [^Result ret]
   (if (and (not (nil? ret))
            (not (nil? (-> ret .getValue))))
-    (into {} (map #(vector (.getKey ^DataEntry %) (.getValue ^DataEntry %)) (.getValue ret)))
-    nil))
+    (map #(vector (.getKey ^DataEntry %) (.getValue ^DataEntry %)) (.getValue ret))
+    ()))
 
 (defn- get-object->resultcode-map [^Result ret]
   (let [ret (if (and (not (nil? ret))
@@ -42,10 +42,17 @@
         ret (into {} (map #(vector (first %) (clojurify-result-code (second %))) ret))]
     ret))
 
-(defn- get-object->result-map [^Result result]
-  (let [result (if (and (not (nil? result))
-                        (not (nil? (.getValue result))))
-                 (into {} (map #(vector (first %) (.getValue ^Result (second %))) (.getValue result)))
+(defn- get-object->result_dataentry-map [^Result ret]
+  (let [ret (if (and (not (nil? ret))
+                     (not (nil? (-> ret .getValue))))
+              (into {} (map #(vector (first %) (.getValue ^DataEntry (.getValue ^Result (second %)))) (.getValue ret)))
+              {})]
+    ret))
+
+(defn- get-object->result_integer-map [^Result ret]
+  (let [result (if (and (not (nil? ret))
+                        (not (nil? (-> ret .getValue))))
+                 (into {} (map #(vector (first %) (.getValue ^Result (second %))) (.getValue ret)))
                  {})]
     result))
 
@@ -179,10 +186,7 @@
 (defn prefix-gets
   [^TairManager tair namespace pkey skeys]
   (let [^Result ret (.prefixGets tair namespace pkey (vec skeys))
-        ret (if (and (not (nil? ret))
-                     (not (nil? (-> ret .getValue))))
-              (into {} (map #(vector (first %) (.getValue ^DataEntry (second %))) (.getValue ret)))
-              {})
+        ret (get-object->result_dataentry-map ret)
         ]
     ret))
 
@@ -203,7 +207,7 @@
                                   3 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2))
                                   4 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2) (nth key-pack 3)))) skey-packs)
         ^Result result (.prefixIncrs tair namespace pkey skey-packs)
-        result (get-object->result-map result)]
+        result (get-object->result_integer-map result)]
     result))
 
 (defn prefix-decr
@@ -223,7 +227,7 @@
                                   3 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2))
                                   4 (CounterPack. (first key-pack) (second key-pack) (nth key-pack 2) (nth key-pack 3)))) skey-packs)
         ^Result result (.prefixDecrs tair namespace pkey skey-packs)
-        result (get-object->result-map result)]
+        result (get-object->result_integer-map result)]
     result))
 
 (defn prefix-set-count
@@ -253,13 +257,7 @@
 (defn prefix-get-hiddens
   [^TairManager tair namespace pkey skeys]
   (let [^Result ret (.prefixGetHiddens tair namespace pkey (vec skeys))
-        ret (if (and (not (nil? ret))
-                     (not (nil? (-> ret .getValue))))
-              (into {} (map #(vector (.getKey ^HashMap$Entry %)
-                                     (-> (.getValue ^Result (.getValue ^HashMap$Entry %)) pretify-result))
-                            (.getValue ret)))
-              nil)
-        ]
+        ret (get-object->result_dataentry-map ret)]
     ret))
 
 (defn prefix-invalid
@@ -324,11 +322,7 @@
 (defn get-range
   [^TairManager tair namespace prefix key-start key-end offset limit]
   (let [^Result ret (.getRange tair namespace prefix key-start key-end offset limit)
-        ret (if (and (not (nil? ret))
-                     (not (nil? (.getValue ret))))
-              (.getValue ret)
-              [])
-        ret (map #(vector (.getKey ^DataEntry %) (.getValue ^DataEntry %)) ret)]
+        ret (get-data-entry-list ret)]
     ret))
 
 (defn get-range-only-key

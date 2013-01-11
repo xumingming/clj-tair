@@ -49,8 +49,8 @@
                                             (.setKey "foo")
                                             (.setValue "bar"))))
             (prefixGets [this namespace pkey skeys]
-              (Result. ResultCode/SUCCESS {"bar1" (DataEntry. "bar1" "value1")
-                                           "bar2" (DataEntry. "bar2" "value2")}))
+              (Result. ResultCode/SUCCESS {"bar1" (Result. ResultCode/SUCCESS (DataEntry. "bar1" "value1"))
+                                           "bar2" (Result. ResultCode/SUCCESS (DataEntry. "bar2" "value2"))}))
             (prefixIncr
               [this namespace pkey skey value default-value expire-time]
               (Result. ResultCode/SUCCESS (int 100)))
@@ -87,8 +87,8 @@
             (prefixGetHiddens
               [this namespace pkey skeys]
               (Result. ResultCode/SUCCESS
-                       {"bar1" (Result. ResultCode/SUCCESS "value") 
-                        "bar2" (Result. ResultCode/SUCCESS "value") }))
+                       {"bar1" (Result. ResultCode/SUCCESS (DataEntry. ResultCode/SUCCESS "value")) 
+                        "bar2" (Result. ResultCode/SUCCESS (DataEntry. ResultCode/SUCCESS "value"))}))
             (prefixInvalid
               [this namespace pkey skey callmode]
               ResultCode/SUCCESS)
@@ -204,7 +204,7 @@
   (is (= "bar" (get tair namespace "key"))))
 
 (deftest test-mget
-  (is (= {"foo" "bar" "hello" "world"} (mget tair namespace ["foo" "hello"]))))
+  (is (= '(["foo" "bar"] ["hello" "world"]) (mget tair namespace ["foo" "hello"]))))
 
 (deftest test-put
   (is (= success-result-code (put tair namespace "foo" "bar")))
